@@ -1,0 +1,13 @@
+Package: asmodeus
+Title: Agent-based Spatiotemporal Molcular Dynamics Evolving Under Simulation
+Version: 1.0.0.0000
+Authors@R: 
+    person("Luca", "Panconi", , "luca.panconi7@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-6025-8597"))
+Description: Introduces functions for simulating dynamics and interactions of multiple transmembrane protein populations under biologically-relevant perturbation conditions.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: ggplot2, gganimate, tidyr, spatstat, Rfast, DescTools
