@@ -115,7 +115,7 @@ ripley_target_pop <- function(points, ROI, R, lambda, distances){
     for(i in 1:length(R)){
       Ks[i,] <- colSums(distance_matrix <= R[i])
     }
-    l <- prod(ROI) / n
+    l <- prod(ROI) / number_of_points
     Ks <- l * Ks
     targets <- vector("list", number_of_points)
     for(i in 1:number_of_points){
