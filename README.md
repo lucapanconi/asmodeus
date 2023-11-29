@@ -76,7 +76,7 @@ plotpoints(very_big_cluster_data, xlimits = c(0, 1000), ylimits = c(0, 1000))
 plotpoints(csr_data, xlimits = c(0, 1000), ylimits = c(0, 1000))
 ```
 
-<img src="https://github.com/lucapanconi/PLASMA/blob/master/disp/Example_Point_Clouds.png" width="801">
+<img src="https://github.com/lucapanconi/asmodeus/blob/master/disp/Example_Point_Clouds.png" width="801">
 
 We can extract the Ripley's K function from any static point cloud with the *ripleyk* function.
 
@@ -99,7 +99,7 @@ plotlines(data = cbind(small_cluster_K,
           labels = c("r", "K(r)"))
 ```
 
-<img src="https://github.com/lucapanconi/PLASMA/blob/master/disp/Example_K_Functions.png" width="801">
+<img src="https://github.com/lucapanconi/asmodeus/blob/master/disp/Example_K_Functions.png" width="801">
 
 ### Basic Dynamic Simulations
 The primary function of ASMODEUS is to simulate agent-based models of molecular dynamics in which each agent (molecule) is iteratively fit to a target spatial statistic (the Ripley's K function). The basic, single population simulation initialises as a CSR distribution and fits to the global K function of a given target point cloud.
@@ -119,7 +119,7 @@ animate_points(simulation = sim1)
 gganimate::anim_save(filename = paste(main, "1_Small_Clusters_Simulation.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/1_Small_Clusters_Simulation.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/1_Small_Clusters_Simulation.gif)
 
 If we know the target K function, we can animate the change in the global Ripley's K function across the simulation.
 
@@ -132,7 +132,7 @@ animate_target(simulation = sim1, ROI = 1000, target = small_cluster_K, legendpo
 gganimate::anim_save(filename = paste(main, "2_Small_Clusters_K.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/2_Small_Clusters_K.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/2_Small_Clusters_K.gif)
 
 Alternatively, we can animate both the K and H function by directly plugging in the target point cloud. The K function appears as above.
 
@@ -145,7 +145,7 @@ animate_H_from_points(simulation = sim1, ROI = 1000, point_clouds = small_cluste
 gganimate::anim_save(filename = paste(main, "3_Small_Clusters_H.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/3_Small_Clusters_H.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/3_Small_Clusters_H.gif)
 
 We can define simulation parameters manually, use *help("globalripleysim")* for details. In particular, we can specify an initial distribution to start the simulation from. In this case, we have set the initial distribution as the big clusters data.
 
@@ -165,7 +165,7 @@ animate_points(simulation = sim2)
 gganimate::anim_save(filename = paste(main, "4_Big_Clusters_to_Small_Clusters_Simulation.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/4_Big_Clusters_to_Small_Clusters_Simulation.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/4_Big_Clusters_to_Small_Clusters_Simulation.gif)
 
 This change of initial distribution is reflected in the H function.
 
@@ -175,7 +175,7 @@ animate_H_from_points(simulation = sim2, ROI = 1000, point_clouds = small_cluste
 gganimate::anim_save(filename = paste(main, "5_Big_Clusters_to_Small_Clusters_H.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/5_Big_Clusters_to_Small_Clusters_H.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/5_Big_Clusters_to_Small_Clusters_H.gif)
 
 If we do not have a target point cloud, but do have a target statistic, we can input this directly. Remember to define the number of points to be used in the simulation.
 
@@ -196,7 +196,7 @@ animate_points(simulation = sim3)
 gganimate::anim_save(filename = paste(main, "6_Big_Clusters_to_Small_Clusters_Simulation_from_Target.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/6_Big_Clusters_to_Small_Clusters_Simulation_from_Target.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/6_Big_Clusters_to_Small_Clusters_Simulation_from_Target.gif)
 
 The target used here is defined manually.
 
@@ -206,7 +206,7 @@ animate_H_from_points(simulation = sim3, ROI = 1000, point_clouds = small_cluste
 gganimate::anim_save(filename = paste(main, "7_Big_Clusters_to_Small_Clusters_H_from_Target.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/7_Big_Clusters_to_Small_Clusters_H_from_Target.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/7_Big_Clusters_to_Small_Clusters_H_from_Target.gif)
 
 ### Multiple Targets
 
@@ -224,7 +224,7 @@ animate_points(simulation = sim4)
 gganimate::anim_save(filename = paste(main, "8_Discrete_Time_Points.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/8_Discrete_Time_Points.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/8_Discrete_Time_Points.gif)
 
 When animating the global H function, we can observe the shift in the target.
 
@@ -234,7 +234,7 @@ animate_H_from_points(simulation = sim4, ROI = 1000, point_clouds = target_cloud
 gganimate::anim_save(filename = paste(main, "9_Discrete_Time_Points_H.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/9_Discrete_Time_Points_H.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/9_Discrete_Time_Points_H.gif)
 
 When providing targets simultaneously, each agent will align with whichever target is closest. We can introduce perturbations at given times which offset each point randomly by a given strength (distance).
 
@@ -247,7 +247,7 @@ animate_points(simulation = sim5)
 gganimate::anim_save(filename = paste(main, "10_Simultaneous_Targets.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/10_Simultaneous_Targets.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/10_Simultaneous_Targets.gif)
 
 The impact of simultaneous targets is often unpredictable.
 
@@ -257,7 +257,7 @@ animate_H_from_points(simulation = sim5, ROI = 1000, point_clouds = target_cloud
 gganimate::anim_save(filename = paste(main, "11_Simultaneous_Targets_H.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/11_Simultaneous_Targets_H.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/11_Simultaneous_Targets_H.gif)
 
 We may also perturb points by cross-linking. This gives the effect of "squeezing" the points into clusters.
 
@@ -274,9 +274,9 @@ animate_H_from_points(simulation = sim6, ROI = 1000, point_clouds = target_cloud
 gganimate::anim_save(filename = paste(main, "13_Simultaneous_Targets_with_Squeeze_H.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/12_Simultaneous_Targets_with_Squeeze.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/12_Simultaneous_Targets_with_Squeeze.gif)
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/13_Simultaneous_Targets_with_Squeeze_H.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/13_Simultaneous_Targets_with_Squeeze_H.gif)
 
 If we don't wish to immobilise agents after cross-linking, we can release them. This allows them to continue drifting.
 
@@ -289,9 +289,9 @@ animate_H_from_points(simulation = sim7, ROI = 1000, point_clouds = target_cloud
 gganimate::anim_save(filename = paste(main, "15_Simultaneous_Targets_with_Squeeze_and_Release_H.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/14_Simultaneous_Targets_with_Squeeze_and_Release.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/14_Simultaneous_Targets_with_Squeeze_and_Release.gif)
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/15_Simultaneous_Targets_with_Squeeze_and_Release_H.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/15_Simultaneous_Targets_with_Squeeze_and_Release_H.gif)
 
 Alternatively, we can manually alter agent step sizes (speed) at distinct time points.
 
@@ -304,9 +304,9 @@ animate_H_from_points(simulation = sim7, ROI = 1000, point_clouds = target_cloud
 gganimate::anim_save(filename = paste(main, "17_Simultaneous_Targets_with_Speed_Change_H.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/16_Simultaneous_Targets_with_Speed_Change.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/16_Simultaneous_Targets_with_Speed_Change.gif)
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/17_Simultaneous_Targets_with_Speed_Change_H.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/17_Simultaneous_Targets_with_Speed_Change_H.gif)
 
 ### Multiple Populations
 
@@ -324,7 +324,7 @@ animate_populations(simulation = sim9, labels = c("Small Clusters", "Big Cluster
 gganimate::anim_save(filename = paste(main, "18_Multiple_Populations_Isolated.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/18_Multiple_Populations_Isolated.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/18_Multiple_Populations_Isolated.gif)
 
 We can also animate without labels.
 
@@ -334,7 +334,7 @@ animate_populations(simulation = sim9, legendposition = "none")
 gganimate::anim_save(filename = paste(main, "19_Multiple_Populations_Isolated_without_Legend.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/19_Multiple_Populations_Isolated_without_Legend.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/19_Multiple_Populations_Isolated_without_Legend.gif)
 
 We can also simulate interactions between populations. In this case, each agent takes account of all other agents, regardless of their population type. To do this, we must convert the point clouds to a single data frame with three columns: x coordinate, y coordinate and population number.
 
@@ -346,7 +346,7 @@ animate_populations(simulation = sim10, legendposition = "none")
 gganimate::anim_save(filename = paste(main, "20_Multiple_Populations.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/20_Multiple_Populations.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/20_Multiple_Populations.gif)
 
 We can induce and track interactions between populations. Here we assume the first point cloud is made of activators, the second is made of inhibitors, and the third is made of agents, which may be acted on by either activators or inhibitors. When an inactive agent (population 3) comes within 5nm of an activator (population 1), it becomes an active agent. Conversely, when an active agent (population 4) comes within 5nm of an activator (population 2), it becomes an inactive agent.
 
@@ -359,7 +359,7 @@ animate_populations(simulation = sim11, labels = c("Activator", "Inhibitor", "In
 gganimate::anim_save(filename = paste(main, "21_Multiple_Populations_with_Interactions.gif", sep = ""))
 ```
 
-![Alt Text](https://github.com/lucapanconi/PLASMA/blob/master/disp/21_Multiple_Populations_with_Interactions.gif)
+![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/21_Multiple_Populations_with_Interactions.gif)
 
 We can track the change in number of a particular population over time.
 
@@ -369,7 +369,7 @@ changes <- track_changes(simulation = sim11, A = 4)
 plotlines(changes, labels = c("time", "number active"))
 ```
 
-<img src="https://github.com/lucapanconi/PLASMA/blob/master/disp/Active_Agents_vs_Time.png" width="801">
+<img src="https://github.com/lucapanconi/asmodeus/blob/master/disp/Active_Agents_vs_Time.png" width="801">
 
 ## License
 Licensed under GNU General Public License v3.0.
