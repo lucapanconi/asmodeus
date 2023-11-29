@@ -1,4 +1,4 @@
-# Point Label Analysis of Super-resolved Membrane Attributes
+# Agent-based Spatiotemporal Molcular Dynamics Evolving Under Simulation
 Agent-based Spatiotemporal MOlcular Dynamics Evolving Under Simulation, or ASMODEUS, is an R package for agent-based modelling of molecular dynamics on locally flat surfaces, with an emphasis on simulating organisation of transmembrane receptors. We use a novel supervised learning approach, which inherits spatial statistics from existing data sets, such as those derived from single molecule localisation microscopy (SMLM).
 
 ## Installation
@@ -13,6 +13,8 @@ devtools::install_github("lucapanconi/asmodeus")
 
 ## Usage
 ### Seting Up
+All code featured on this page is summarised in the *test_suite.R* file.
+
 First, load the package into your R session.
 ```{r}
 #Implement ASMODEUS library.
@@ -109,7 +111,7 @@ The primary function of ASMODEUS is to simulate agent-based models of molecular 
 sim1 <- globalripleysim(point_cloud = small_cluster_data)
 ```
 
-Here, we try to rederive the *small_cluster_data* point clouds from Markov Chain Monte Carlo simulation. We can animate this simulating using the *animate_points* function.
+Here, we try to rederive the *small_cluster_data* point clouds from Markov Chain Monte Carlo simulation. We can animate this simulation using the *animate_points* function.
 
 ```{r}
 #Animate point distribution.
@@ -252,7 +254,7 @@ gganimate::anim_save(filename = paste(main, "10_Simultaneous_Targets.gif", sep =
 The impact of simultaneous targets is often unpredictable.
 
 ```{r}
-#The H function may assume one target over another, or fall somewhere in between.
+#The H function may assume one target over another, or fall somewhere inbetween.
 animate_H_from_points(simulation = sim5, ROI = 1000, point_clouds = target_clouds, legendposition = "none")
 gganimate::anim_save(filename = paste(main, "11_Simultaneous_Targets_H.gif", sep = ""))
 ```
@@ -326,7 +328,7 @@ gganimate::anim_save(filename = paste(main, "18_Multiple_Populations_Isolated.gi
 
 ![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/18_Multiple_Populations_Isolated.gif)
 
-We can also animate without labels.
+Labels can be removed by removing the legend.
 
 ```{r}
 #We can also plot this without labels.
@@ -348,13 +350,13 @@ gganimate::anim_save(filename = paste(main, "20_Multiple_Populations.gif", sep =
 
 ![Alt Text](https://github.com/lucapanconi/asmodeus/blob/master/disp/20_Multiple_Populations.gif)
 
-We can induce and track interactions between populations. Here we assume the first point cloud is made of activators, the second is made of inhibitors, and the third is made of agents, which may be acted on by either activators or inhibitors. When an inactive agent (population 3) comes within 5nm of an activator (population 1), it becomes an active agent. Conversely, when an active agent (population 4) comes within 5nm of an activator (population 2), it becomes an inactive agent.
+After this, we can induce and track interactions between populations. Here we assume the first point cloud is made of activators, the second is made of inhibitors, and the third is made of agents, which may be acted on by either activators or inhibitors. When an inactive agent (population 3) comes within 5nm of an activator (population 1), it becomes an active agent. Conversely, when an active agent (population 4) comes within 5nm of an inhibitor (population 2), it becomes an inactive agent.
 
 ```{r}
 #We can induce molecular interactions after the simulation is complete. Here we assume the first point cloud is made of activators, the second is made of inhibitors, and the third is made of agents, which may be acted on by either activators or inhibitors.
 sim11 <- population_changer(simulation = sim10, A = c(3, 4), B = c(4, 3), C = c(1, 2), D = c(5, 5))
 
-#When an inactive agent (population 3) comes within 5nm of an activator (population 1), it becomes an active agent. Conversely, when an active agent (population 4) comes within 5nm of an activator (population 2), it becomes an inactive agent.
+#When an inactive agent (population 3) comes within 5nm of an activator (population 1), it becomes an active agent. Conversely, when an active agent (population 4) comes within 5nm of an inhibitor (population 2), it becomes an inactive agent.
 animate_populations(simulation = sim11, labels = c("Activator", "Inhibitor", "Inactive Agent", "Active Agent"))
 gganimate::anim_save(filename = paste(main, "21_Multiple_Populations_with_Interactions.gif", sep = ""))
 ```
