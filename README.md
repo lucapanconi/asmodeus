@@ -1,5 +1,5 @@
-# Agent-based Spatiotemporal Molcular Dynamics Evolving Under Simulation
-Agent-based Spatiotemporal MOlcular Dynamics Evolving Under Simulation, or ASMODEUS, is an R package for agent-based modelling of molecular dynamics on locally flat surfaces, with an emphasis on simulating organisation of transmembrane receptors. We use a novel supervised learning approach, which inherits spatial statistics from existing data sets, such as those derived from single molecule localisation microscopy (SMLM).
+# Agent-based Spatiotemporal Molecular Dynamics Evolving Under Simulation
+Agent-based Spatiotemporal MOlecular Dynamics Evolving Under Simulation, or ASMODEUS, is an R package for agent-based modelling of molecular dynamics on locally flat surfaces, with an emphasis on simulating organisation of transmembrane receptors. We use a novel supervised learning approach, which inherits spatial statistics from existing data sets, such as those derived from single molecule localisation microscopy (SMLM).
 
 ## Installation
 The package can be installed using pre-existing functions in the [**devtools**](https://cran.r-project.org/web/packages/devtools/index.html) package. It is highly recommended that you use **RStudio**. If you do not have **devtools** installed, enter the following line into the command prompt:
