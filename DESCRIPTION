@@ -1,6 +1,6 @@
 Package: asmodeus
 Title: Agent-based Spatiotemporal Molcular Dynamics Evolving Under Simulation
-Version: 1.0.1.0000
+Version: 1.0.2.0000
 Authors@R: 
     person("Luca", "Panconi", , "luca.panconi7@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6025-8597"))
