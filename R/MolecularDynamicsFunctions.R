@@ -4,7 +4,7 @@
 #' Calculates the localised, linearised Ripley's K function for each point.
 #'
 #' @param points A matrix or data frame with two columns: x and y coordinates of each point.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
 #' @param nrval Numeric value, the number of equally-spaced radial values for each K function to be calculated over.
 #' @return A list of the local K functions, one for each row (point) in points.
@@ -17,10 +17,10 @@ ripley_target <- function(points, ROI, rmax = 200, nrval = 20){
   #Get volume and number of points.
   volume <- prod(ROI)
   number_of_points <- nrow(points)
-  lambda <- volume/(number_of_points * (number_of_points - 1))
+  l <- volume/(number_of_points * (number_of_points - 1))
   
   #Calculate local K for each point.
-  Ks <- lambda * do.call(cbind, lapply(R, function(r){
+  Ks <- l * do.call(cbind, lapply(R, function(r){
     return(rowSums(distance_matrix <= r))
   }))
   return(lapply(1:number_of_points, function(i){
@@ -33,7 +33,7 @@ ripley_target <- function(points, ROI, rmax = 200, nrval = 20){
 #' Calculates the localised, linearised Ripley's K function for each point using Euclidean distance, slightly faster.
 #'
 #' @param points A matrix or data frame with two columns: x and y coordinates of each point.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
 #' @param nrval Numeric value, the number of equally-spaced radial values for each K function to be calculated over.
 #' @return A list of the local K functions, one for each row (point) in points.
@@ -46,14 +46,14 @@ ripley_target_euclidean <- function(points, ROI, rmax = 200, nrval = 20){
   #Get volume and number of points.
   volume <- prod(ROI)
   number_of_points <- nrow(points)
-  lambda <- volume/number_of_points
+  l <- volume/number_of_points
   
   #Calculate local K for each point.
   Ks <- matrix(0, nrow = nrval, ncol = number_of_points)
   for(i in 1:length(R)){
     Ks[i,] <- colSums(distance_matrix <= R[i]) - 1
   }
-  Ks <- lambda * Ks
+  Ks <- l * Ks
   targets <- vector("list", number_of_points)
   for(i in 1:number_of_points){
     targets[[i]] <- cbind(R, Ks[,i])
@@ -66,13 +66,11 @@ ripley_target_euclidean <- function(points, ROI, rmax = 200, nrval = 20){
 #' Calculates the localised, linearised Ripley's K function for each point using Euclidean distance, slightly faster. Uses alternative calculation for computational efficiency. Used in main simulator.
 #'
 #' @param points A matrix or data frame with two columns: x and y coordinates of each point.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param R A vector of radial values for which to calculate the K function over.
-#' @param lambda Numeric value, used to weight the K function. Calculated automatically, should not be altered.
-#' @param number_of_points Numeric value, the number of data points. Calculated automatically if not given.
 #' @return A list of the local K functions, one for each row (point) in points.
 #' @export
-ripley_target_euclidean_main <- function(points, ROI, R, lambda, number_of_points){
+ripley_target_euclidean_main <- function(points, ROI, R){
   #Calculate distance matrix.
   distance_matrix <- as.matrix(Rfast::Dist(points))
   
@@ -96,13 +94,12 @@ ripley_target_euclidean_main <- function(points, ROI, R, lambda, number_of_point
 #' Calculates the localised, linearised Ripley's K function for each point of a given population compared to all other populations.
 #'
 #' @param points A matrix or data frame with two columns: x and y coordinates of each point.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param R A vector of radial values for which to calculate the K function over.
-#' @param lambda Numeric value, used to weight the K function. Calculated automatically, should not be altered.
 #' @param distances A distance matrix between all points.
 #' @return A list of the local K functions, one for each row (point) in points.
 #' @export
-ripley_target_pop <- function(points, ROI, R, lambda, distances){
+ripley_target_pop <- function(points, ROI, R, distances){
   #Get K function for each point of each unique point type.
   uniques <- unique(points[,ncol(points)])
   point_targets <- vector("list", length(uniques))
@@ -244,11 +241,10 @@ pointwise_ratiometric_error_main <- function(target, actual, n){
 #'
 #' @param target A target, aggregated from output of a target function.
 #' @param actual A list of actual point statistics, taken points input to target functions.
-#' @param n Number of points, the length of actual.
-#' @param num Placeholder argument, currently unused.
+#' @param n Number of radial values to average over.
 #' @return A vector of error values, one for each point.
 #' @export
-pointwise_ratiometric_error_main_global <- function(target, actual, n, num){
+pointwise_ratiometric_error_main_global <- function(target, actual, n){
   R <- target[,1]
   errors <- rep(0, length(actual))
   for(i in 1:length(actual)){
@@ -397,7 +393,7 @@ preferential_ratiometric_error_all_from_zero <- function(targets, actual, n){
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param error A vector of error values, as output by error function.
 #' @return Offsets for each point (in this case, 0).
 #' @export
@@ -412,7 +408,7 @@ default_velocity_2D <- function(D_min, D_max, ROI, error){
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param error A vector of error values, as output by error function.
 #' @param threshold A numeric value. If a point's error is above the threshold, it will be offset with step size D_max, otherwise it will be offset with step size D_min.
 #' @return Offsets for each point.
@@ -430,7 +426,7 @@ step_velocity <- function(D_min, D_max, ROI, error, threshold = 0.5){
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param error A vector of error values, as output by error function.
 #' @return Offsets for each point.
 #' @export
@@ -447,7 +443,7 @@ linear_velocity <- function(D_min, D_max, ROI, error){
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param error A vector of error values, as output by error function.
 #' @return Offsets for each point.
 #' @export
@@ -464,7 +460,7 @@ quadratic_velocity <- function(D_min, D_max, ROI, error){
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param error A vector of error values, as output by error function.
 #' @param n Factor of polynomial used in velocity calculation.
 #' @return Offsets for each point.
@@ -482,7 +478,7 @@ polynomial_velocity <- function(D_min, D_max, ROI, error, n = 2){
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param error A vector of error values, as output by error function.
 #' @param n Factor of polynomial used in velocity calculation.
 #' @return Offsets for each point.
@@ -506,7 +502,7 @@ polynomial_velocity_pop <- function(clouds, D_min, D_max, ROI, errors, n = 2){
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param error A vector of error values, as output by error function.
 #' @return Offsets for each point.
 #' @export
@@ -523,7 +519,7 @@ basic_exponential_velocity <- function(D_min, D_max, ROI, error){
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param error A vector of error values, as output by error function.
 #' @param n Factor of polynomial used in velocity calculation.
 #' @return Offsets for each point.
@@ -541,7 +537,7 @@ exponential_velocity <- function(D_min, D_max, ROI, error, n = 2){
 #' Does not correct points which escape boundary.
 #'
 #' @param points A matrix or data frame with two columns: x and y coordinates of each point.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @return New point coordinates after correction.
 #' @export
 default_correction <- function(points, ROI){
@@ -553,7 +549,7 @@ default_correction <- function(points, ROI){
 #' Wraps points around to other side.
 #'
 #' @param points A matrix or data frame with two columns: x and y coordinates of each point.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @return New point coordinates after correction.
 #' @export
 toroidal_correction <- function(points, ROI){
@@ -569,7 +565,7 @@ toroidal_correction <- function(points, ROI){
 #' Causes points to rebound off of sides of ROI.
 #'
 #' @param points A matrix or data frame with two columns: x and y coordinates of each point.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @return New point coordinates after correction.
 #' @export
 reflection_correction <- function(points, ROI){
@@ -585,7 +581,7 @@ reflection_correction <- function(points, ROI){
 #' Causes points to rebound off of sides of ROI. Used in multiple populations cases.
 #'
 #' @param clouds A list of points data, where each data set is given as a matrix or data frame with two columns: x and y coordinates of each point.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @return New point coordinates after correction.
 #' @export
 reflection_correction_pop <- function(clouds, ROI){
@@ -607,7 +603,7 @@ reflection_correction_pop <- function(clouds, ROI){
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param times Number of time steps or iterations of the simulation.
 #' @param point_cloud A matrix or data frame with two columns: x and y coordinates of each point. Used as a target distribution from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
@@ -639,17 +635,11 @@ globalripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, po
   #Get R values.
   R <- (1:nrval) * (rmax / nrval)
   
-  #Get volume.
-  volume <- prod(ROI)
-  
   #Check point cloud is given, otherwise use target.
   if(is.matrix(point_cloud) || is.data.frame(point_cloud)){
-    lambda <- volume/number_of_points
-    target <- ripley_aggregate(ripley_target_euclidean_main(point_cloud, ROI, R, lambda, number_of_points))
+    target <- ripley_aggregate(ripley_target_euclidean_main(point_cloud, ROI, R))
   } else if(is.null(target) || is.null(number_of_points)){
     stop("You must provide a target point cloud or define the target and number of points manually.")
-  } else {
-    lambda <- volume/number_of_points
   }
   
   #Get initial distribution.
@@ -666,8 +656,8 @@ globalripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, po
   if(output_target){
     targets <- vector("list", times)
     for(time in 1:times){
-      current_target <- ripley_target_euclidean_main(current_cloud, ROI,  R, lambda, number_of_points)
-      current_cloud <- reflection_correction(current_cloud + polynomial_velocity(D_min, D_max, ROI, pointwise_ratiometric_error_main_global(target, current_target, nrval, number_of_points)), ROI)
+      current_target <- ripley_target_euclidean_main(current_cloud, ROI, R)
+      current_cloud <- reflection_correction(current_cloud + polynomial_velocity(D_min, D_max, ROI, pointwise_ratiometric_error_main_global(target, current_target, nrval)), ROI)
       frames[[time]] <- current_cloud
       targets[[time]] <- ripley_H_aggregate(current_target)
     }
@@ -675,7 +665,7 @@ globalripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, po
     return(list(frames, targets))
   } else {
     for(time in 1:times){
-      current_cloud <- reflection_correction(current_cloud + polynomial_velocity(D_min, D_max, ROI, pointwise_ratiometric_error_main_global(target, ripley_aggregate(ripley_target_euclidean_main(current_cloud, ROI,  R, lambda, number_of_points), nrval), nrval, number_of_points)), ROI)
+      current_cloud <- reflection_correction(current_cloud + polynomial_velocity(D_min, D_max, ROI, pointwise_ratiometric_error_main_global(target, ripley_aggregate(ripley_target_euclidean_main(current_cloud, ROI,  R)), nrval)), ROI)
       frames[[time]] <- current_cloud
     }
     #Return frames.
@@ -689,7 +679,7 @@ globalripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, po
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param time_points A vector of time points in the simulation. Each time point represents a change in target function. The final value in this vector is the total simulation time.
 #' @param point_cloud A matrix or data frame with two columns: x and y coordinates of each point. Used as a target distribution from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
@@ -752,7 +742,7 @@ distripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  time_points = 1000
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param times Number of time steps or iterations of the simulation.
 #' @param point_clouds A list of points data, where each data set is given as a matrix or data frame with two columns: x and y coordinates of each point. Used as target distributions from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
@@ -791,18 +781,13 @@ simripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
   #Get R values.
   R <- (1:nrval) * (rmax / nrval)
   
-  #Get volume.
-  volume <- prod(ROI)
-  
   #Create simulation list.
   frames <- vector("list", times)
   
   #Get point targets.
   if(is.null(targets)){
     point_targets <- lapply(point_clouds, function(points){
-      number_of_points <- nrow(points)
-      lambda <- volume/number_of_points
-      return(ripley_aggregate(ripley_target_euclidean_main(points, ROI, R, lambda, number_of_points)))
+      return(ripley_aggregate(ripley_target_euclidean_main(points, ROI, R)))
     })
   } else {
     point_targets <- targets
@@ -812,7 +797,6 @@ simripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
   if(is.null(number_of_points)){
     number_of_points <- nrow(point_clouds[[1]])
   }
-  lambda <- volume/number_of_points
   
   #Get initial distribution.
   if(is.null(initial_distribution)){
@@ -827,7 +811,7 @@ simripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
   if(output_target){
     targets <- vector("list", times)
     for(time in 1:times){
-      current_target <- ripley_target_euclidean_main(current_cloud, ROI,  R, lambda, number_of_points)
+      current_target <- ripley_target_euclidean_main(current_cloud, ROI,  R)
       current_cloud <- reflection_correction(current_cloud + polynomial_velocity(D_min, D_max, ROI, preferential_ratiometric_error_main(point_targets, current_target, nrval)), ROI)
       frames[[time]] <- current_cloud
       targets[[time]] <- ripley_H_aggregate(current_target)
@@ -840,7 +824,7 @@ simripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
     return(list(frames, targets))
   } else {
     for(time in 1:times){
-      current_cloud <- reflection_correction(current_cloud + polynomial_velocity(D_min, D_max, ROI, preferential_ratiometric_error_main(point_targets, ripley_aggregate(ripley_target_euclidean_main(current_cloud, ROI,  R, lambda, number_of_points), nrval), nrval)), ROI)
+      current_cloud <- reflection_correction(current_cloud + polynomial_velocity(D_min, D_max, ROI, preferential_ratiometric_error_main(point_targets, ripley_aggregate(ripley_target_euclidean_main(current_cloud, ROI,  R)), nrval)), ROI)
       frames[[time]] <- current_cloud
       if(max(perturbation_times == time) > 0){
         angle <- runif(n = number_of_points, min = 0, max = 2 * pi)
@@ -858,7 +842,7 @@ simripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param times Number of time steps or iterations of the simulation.
 #' @param point_clouds A list of points data, where each data set is given as a matrix or data frame with two columns: x and y coordinates of each point. Used as target distributions from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
@@ -929,18 +913,13 @@ squeezeripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, p
   #Get R values.
   R <- (1:nrval) * (rmax / nrval)
   
-  #Get volume.
-  volume <- prod(ROI)
-  number_of_points <- nrow(point_clouds[[1]])
-  lambda <- volume/(number_of_points)
-  
   #Create simulation list.
   frames <- sim[[1]]
   
   #Get point targets.
   if(is.null(targets)){
     point_targets <- lapply(point_clouds, function(points){
-      return(ripley_aggregate(ripley_target_euclidean_main(points, ROI, R, lambda, number_of_points)))
+      return(ripley_aggregate(ripley_target_euclidean_main(points, ROI, R)))
     })
   } else {
     point_targets <- targets
@@ -948,12 +927,13 @@ squeezeripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, p
   
   #Get initial distribution.
   current_cloud <- final
+  number_of_points <- nrow(current_cloud)
   
   #Repeat for all times.
   if(output_target){
     targets <- sim[[2]]
     for(time in (perturbation_time + 1):times){
-      current_target <- ripley_target_euclidean_main(current_cloud, ROI,  R, lambda, number_of_points)
+      current_target <- ripley_target_euclidean_main(current_cloud, ROI,  R)
       velocity <- polynomial_velocity(D_min, D_max, ROI, preferential_ratiometric_error_main(point_targets, current_target, nrval))
       velocity[added, ] <- c(0,0)
       current_cloud <- reflection_correction(current_cloud + velocity, ROI)
@@ -980,7 +960,7 @@ squeezeripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, p
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param times Number of time steps or iterations of the simulation.
 #' @param point_clouds A list of points data, where each data set is given as a matrix or data frame with two columns: x and y coordinates of each point. Used as target distributions from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
@@ -1051,18 +1031,13 @@ squeezereleaseripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 
   #Get R values.
   R <- (1:nrval) * (rmax / nrval)
   
-  #Get volume.
-  volume <- prod(ROI)
-  
   #Create simulation list.
   frames <- sim[[1]]
   
   #Get point targets.
   if(is.null(targets)){
     point_targets <- lapply(point_clouds, function(points){
-      number_of_points <- nrow(points)
-      lambda <- volume/number_of_points
-      return(ripley_aggregate(ripley_target_euclidean_main(points, ROI, R, lambda, number_of_points)))
+      return(ripley_aggregate(ripley_target_euclidean_main(points, ROI, R)))
     })
   } else {
     point_targets <- targets
@@ -1070,7 +1045,6 @@ squeezereleaseripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 
   
   #Update parameters.
   number_of_points <- nrow(final)
-  lambda <- volume/number_of_points
   
   #Get initial distribution.
   current_cloud <- final
@@ -1079,7 +1053,7 @@ squeezereleaseripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 
   if(output_target){
     targets <- sim[[2]]
     for(time in (perturbation_time + 1):times){
-      current_target <- ripley_target_euclidean_main(current_cloud, ROI,  R, lambda, number_of_points)
+      current_target <- ripley_target_euclidean_main(current_cloud, ROI,  R)
       velocity <- polynomial_velocity(D_min, D_max, ROI, preferential_ratiometric_error_main(point_targets, current_target, nrval))
       current_cloud <- reflection_correction(current_cloud + velocity, ROI)
       frames[[time]] <- current_cloud
@@ -1104,7 +1078,7 @@ squeezereleaseripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 
 #'
 #' @param D_min A vector of minimum step sizes. Will switch to next available size after perturbation.
 #' @param D_max A vector of maximum step sizes. Will switch to next available size after perturbation.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param times Number of time steps or iterations of the simulation.
 #' @param point_clouds A list of points data, where each data set is given as a matrix or data frame with two columns: x and y coordinates of each point. Used as target distributions from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
@@ -1158,7 +1132,6 @@ speedripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, poi
   if(is.null(number_of_points)){
     number_of_points <- nrow(point_clouds[[1]])
   }
-  volume <- prod(ROI)
   
   #Create simulation list.
   frames <- vector("list", times)
@@ -1166,9 +1139,7 @@ speedripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, poi
   #Get point targets.
   if(is.null(targets)){
     point_targets <- lapply(point_clouds, function(points){
-      number_of_points <- nrow(point_clouds[[1]])
-      lambda <- volume/number_of_points
-      return(ripley_aggregate(ripley_target_euclidean_main(points, ROI, R, lambda, number_of_points)))
+      return(ripley_aggregate(ripley_target_euclidean_main(points, ROI, R)))
     })
   } else {
     point_targets <- targets
@@ -1195,7 +1166,7 @@ speedripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, poi
     #Repeat for all times.
     if(output_target){
       for(time in (time_points[i] + 1):time_points[i + 1]){
-        current_target <- ripley_target_euclidean_main(current_cloud, ROI,  R, lambda, number_of_points)
+        current_target <- ripley_target_euclidean_main(current_cloud, ROI,  R)
         current_cloud <- reflection_correction(current_cloud + polynomial_velocity(Dmin, Dmax, ROI, preferential_ratiometric_error_main(point_targets, current_target, nrval)), ROI)
         frames[[time]] <- current_cloud
         targets[[time]] <- ripley_H_aggregate(current_target)
@@ -1207,7 +1178,7 @@ speedripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, poi
       
     } else {
       for(time in time_points[i]:time_points[i + 1]){
-        current_cloud <- reflection_correction(current_cloud + polynomial_velocity(Dmin, Dmax, ROI, preferential_ratiometric_error_main(point_targets, ripley_aggregate(ripley_target_euclidean_main(current_cloud, ROI,  R, lambda, number_of_points), nrval), nrval)), ROI)
+        current_cloud <- reflection_correction(current_cloud + polynomial_velocity(Dmin, Dmax, ROI, preferential_ratiometric_error_main(point_targets, ripley_aggregate(ripley_target_euclidean_main(current_cloud, ROI,  R)), nrval)), ROI)
         frames[[time]] <- current_cloud
         if(max(perturbation_times == time) > 0){
           angle <- runif(n = number_of_points, min = 0, max = 2 * pi)
@@ -1233,7 +1204,7 @@ speedripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, poi
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param times Number of time steps or iterations of the simulation.
 #' @param point_clouds A list of points data, where each data set is given as a matrix or data frame with two columns: x coordinate and y coordinate of each point. Used as target distributions from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
@@ -1269,7 +1240,7 @@ popripleysimisol <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, p
 #'
 #' @param D_min Minimum step size.
 #' @param D_max Maximum step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param times Number of time steps or iterations of the simulation.
 #' @param point_cloud A matrix or data frame with three columns: x coordinate, y coordinate, and population number of each point. Used as target distributions from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
@@ -1286,6 +1257,7 @@ popripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
   #Get dimensions of ROI.
   if(is.matrix(point_cloud) || is.data.frame(point_cloud)){
     dimensions <- ncol(point_cloud) - 1
+    number_of_points <- nrow(point_cloud)
   }
   if(length(ROI) > 1){
     dimensions <- length(ROI)
@@ -1296,19 +1268,12 @@ popripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
   #Get R values.
   R <- (1:nrval) * (rmax / nrval)
   
-  #Get volume.
-  volume <- prod(ROI)
-  
   #Check point cloud is given, otherwise use target.
   if(is.matrix(point_cloud) || is.data.frame(point_cloud)){
-    number_of_points <- nrow(point_cloud)
-    lambda <- volume/number_of_points
     distances <- as.matrix(Rfast::Dist(point_cloud[,1:(ncol(point_cloud) - 1)]))
-    point_targets <- ripley_aggregate_pop(ripley_target_pop(point_cloud, ROI, R, lambda, distances))
+    point_targets <- ripley_aggregate_pop(ripley_target_pop(point_cloud, ROI, R, distances))
   } else if(is.null(target) || is.null(number_of_points)){
     stop("You must provide a target point cloud or define the target and number of points manually.")
-  } else {
-    lambda <- volume/number_of_points
   }
   
   #Get initial distribution.
@@ -1340,7 +1305,7 @@ popripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
     targets <- vector("list", times)
     for(time in 1:times){
       distances <- as.matrix(Rfast::Dist(current_cloud[,1:(ncol(current_cloud) - 1)]))
-      current_target <- ripley_target_pop(current_cloud, ROI,  R, lambda, distances)
+      current_target <- ripley_target_pop(current_cloud, ROI,  R, distances)
       clouds <- reflection_correction_pop(polynomial_velocity_pop(clouds, D_min, D_max, ROI, pointwise_ratiometric_error_pop(point_targets, current_target, nrval)), ROI)
       current_cloud <- do.call(rbind, clouds)
       frames[[time]] <- current_cloud
@@ -1350,7 +1315,7 @@ popripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
     return(list(frames, targets))
   } else {
     for(time in 1:times){
-      current_cloud <- reflection_correction(current_cloud + polynomial_velocity(D_min, D_max, ROI, pointwise_ratiometric_error_main_global(target, ripley_aggregate(ripley_target_euclidean_main(current_cloud, ROI,  R, lambda, number_of_points), nrval), nrval, number_of_points)), ROI)
+      current_cloud <- reflection_correction(current_cloud + polynomial_velocity(D_min, D_max, ROI, pointwise_ratiometric_error_main_global(target, ripley_aggregate(ripley_target_euclidean_main(current_cloud, ROI,  R)), nrval, number_of_points)), ROI)
       frames[[time]] <- current_cloud
     }
     #Return frames.
@@ -1363,7 +1328,7 @@ popripleysim <- function(D_min = 0, D_max = 50, ROI = 1000,  times = 1000, point
 #' Simulates CSR distributions moving with fixed random step size and removes points of a certain population at a given rate.
 #'
 #' @param step_size Fixed step size.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param times Number of time steps or iterations of the simulation.
 #' @param populations Number of distinct point populations to consider.
 #' @param initial_numbers Initial number of points in each population. Can specify for each population with a vector.
@@ -1429,7 +1394,7 @@ csrwithremoval <- function(step_size = 50, ROI = 1000, times = 100, populations 
 #'
 #' Simulates a static point cloud with circular clusters.
 #'
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param number_of_clusters Integer, number of circular clusters to generate.
 #' @param cluster_radius Numeric, radius of the clusters.
 #' @param points_per_cluster Integer, the number of points in each cluster.
@@ -1463,7 +1428,7 @@ simulatecircularclusters <- function(ROI = 1000, number_of_clusters = 10, cluste
 #'
 #' Simulates a static point cloud with randomly placed points.
 #'
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param number_of_points Integer, number of points in point cloud.
 #' @return A matrix with two columns: the x and y coordinates of the point cloud. This point cloud will contain randomly placed points only.
 #' @export
@@ -1481,7 +1446,7 @@ simulatecsr <- function(ROI, number_of_points){
 #' Calculate the global Ripley's K function for a point cloud.
 #'
 #' @param points A matrix or data frame with two columns: x and y coordinates of each point.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
 #' @param nrval Numeric value, the number of equally-spaced radial values for each K function to be calculated over.
 #' @return The global K function for the points data set.
@@ -1978,12 +1943,6 @@ animate_populations <- function(simulation, integer_times = TRUE, time_step = 1,
                    axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(),
                    legend.title = ggplot2::element_blank(), legend.text = ggplot2::element_text(size = 16),
                    legend.position = legendposition, text = ggplot2::element_text(family = "serif", size = 16))
-    # ggplot2::theme(panel.background = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),
-    #                panel.grid.minor = ggplot2::element_blank(), legend.title = ggplot2::element_blank(),
-    #                panel.border = ggplot2::element_rect(colour = "black", fill = NA, linewidth = 1),
-    #                legend.text = ggplot2::element_text(size = text_size), axis.text.x = ggplot2::element_text(size = axis_text_size),
-    #                axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(),
-    #                axis.text.y = ggplot2::element_text(size = axis_text_size))
   if(integer_times){
     p + gganimate::transition_time(as.integer(t)) + ggplot2::labs(title = paste("Time: {frame_time * time_step}", time_unit, sep = ""))
   } else {
@@ -1996,7 +1955,7 @@ animate_populations <- function(simulation, integer_times = TRUE, time_step = 1,
 #' Animates the actual Ripley's K function of the point distribution in the simulation, compared to a target curve.
 #'
 #' @param simulation Input simulation.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param target The target curve.
 #' @param rmax Numeric value, the maximum radius for each K function to be calculated at.
 #' @param nrval Numeric value, the number of equally-spaced radial values for each K function to be calculated over.
@@ -2042,7 +2001,7 @@ animate_target <- function(simulation, ROI, target, rmax = 200, nrval = 20, inte
 #' Animates the actual Ripley's H function fitting to other H function(s) from a given point cloud or clouds.
 #'
 #' @param simulation Input simulation.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param point_clouds A list of points data, where each data set is given as a matrix or data frame with two columns: x coordinate and y coordinate. Used as target distributions from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each Ripley's function to be calculated at.
 #' @param nrval Numeric value, the number of equally-spaced radial values for each Ripley's function to be calculated over.
@@ -2139,8 +2098,8 @@ animate_H_from_points <- function(simulation, ROI, point_clouds, rmax = 200, nrv
     colnames(all_data) <- c("x", "Target", "Actual", "t")
     cols <- c("Target" = colours[1], "Actual" = colours[2])
     p <- ggplot2::ggplot(all_data, ggplot2::aes(x = x)) +
-      ggplot2::geom_line(ggplot2::aes(y = Actual, colour = "Actual"), size = 1) +
-      ggplot2::geom_line(ggplot2::aes(y = Target, colour = "Target"), size = 1) +
+      ggplot2::geom_line(ggplot2::aes(y = Actual, colour = "Actual"), linewidth = 1) +
+      ggplot2::geom_line(ggplot2::aes(y = Target, colour = "Target"), linewidth = 1) +
       ggplot2::labs(x = "r", y = "H(r)") +
       ggplot2::scale_colour_manual(name = "Functions", values = cols) +
       ggplot2::scale_x_continuous(expand = c(0.01, 0.01)) +
@@ -2162,7 +2121,7 @@ animate_H_from_points <- function(simulation, ROI, point_clouds, rmax = 200, nrv
 #' Animates the actual Ripley's K function fitting to other K function(s) from a given point cloud or clouds.
 #'
 #' @param simulation Input simulation.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param point_clouds A list of points data, where each data set is given as a matrix or data frame with two columns: x coordinate and y coordinate. Used as target distributions from which spatial statistics are drawn.
 #' @param rmax Numeric value, the maximum radius for each Ripley's function to be calculated at.
 #' @param nrval Numeric value, the number of equally-spaced radial values for each Ripley's function to be calculated over.
@@ -2278,7 +2237,7 @@ animate_K_from_points <- function(simulation, ROI, point_clouds, rmax = 200, nrv
 #' Animates the actual Ripley's H function fitting to another H function for one population in a multiple populations simulation.
 #'
 #' @param simulation Input simulation.
-#' @param ROI A vector of two values representing the width and height of the region of interest, respectively.
+#' @param ROI A vector of two values representing the width and height of the region of interest, respectively. The region of interest is considered from the origin to the points given here, so point clouds must be translated accordingly.
 #' @param point_cloud A matrix or data frame with two columns: x coordinate and y coordinate. Used as target distribution from which spatial statistics are drawn.
 #' @param population_number The index of the population to be extracted and analysed.
 #' @param rmax Numeric value, the maximum radius for each Ripley's function to be calculated at.
@@ -2297,11 +2256,8 @@ animate_H_from_populations <- function(simulation, ROI, point_cloud, population_
   })
   simulation <- list(simulation[[1]], targets)
   #Get original target for that population.
-  volume <- prod(ROI)
-  number_of_points <- nrow(point_cloud)
-  lambda <- volume/(number_of_points)
   distances <- as.matrix(Rfast::Dist(point_cloud[,1:(ncol(point_cloud) - 1)]))
-  target <- ripley_H_aggregate_pop(ripley_target_pop(point_cloud, ROI, R, lambda, distances))[[population_number]]
+  target <- ripley_H_aggregate_pop(ripley_target_pop(point_cloud, ROI, R, distances))[[population_number]]
   #Feed into animator.
   animate_target(simulation, ROI, target, rmax, nrval, integer_times, colours, labels, time_step, time_unit)
 }
