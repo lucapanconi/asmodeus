@@ -1,6 +1,6 @@
 #Set up.
 #Include package.
-# library(asmodeus)
+library(asmodeus)
 
 #Set seed - ensures same outcome from randomised functions.
 set.seed(1)
