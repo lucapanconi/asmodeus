@@ -1,6 +1,7 @@
 #Set up.
 #Include package.
-# library(asmodeus)
+library(asmodeus)
+library(gifski)
 
 #Set seed - ensures same outcome from randomised functions.
 set.seed(1)
