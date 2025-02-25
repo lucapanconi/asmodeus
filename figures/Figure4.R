@@ -13,7 +13,6 @@ input_dir <- paste(getwd(), input_dir, sep = "/")
 output_dir <- paste(getwd(), output_dir, sep = "/")
 
 #Perform ANOVA and TukeyHSD on configurations inflection points and scales.
-#Read in data.
 inflections <- read.csv(conc(input_dir, "All Configurations vs Point of Inflection.csv"))
 inflections[,1] <- letters[1:15]
 colnames(inflections) <- c("configuration", conc("trial_", 1:10))
@@ -127,13 +126,13 @@ plotboxplot <- function(points, labels = c("x", "y"), w = 1, axes = c("type", "v
   }
 }
 
-#Create box plots.
+#Create box plots (ai and bi).
 plotboxplot(infdata, axes = c("configuration", "point of inflection"), w = 0.9, textsize = 32, linethickness = 0.5)
-savetwoplots(conc(output_dir, "Configuration vs Point of Inflection"), height = 20, width = 30)
+savetwoplots(conc(output_dir, "ai"), height = 20, width = 30)
 plotboxplot(scadata, axes = c("configuration", "scale"), w = 0.9, textsize = 32, linethickness = 0.5)
-savetwoplots(conc(output_dir, "Configuration vs Scale"), height = 20, width = 30)
+savetwoplots(conc(output_dir, "bi"), height = 20, width = 30)
 
-#Perform ANOVA and generate heat maps - note that this shows Configuration 1 (row) - Configuration 2 (column).
+#aii - Perform ANOVA and generate heat maps on inflections - note that this shows Configuration 1 (row) - Configuration 2 (column).
 #Inflections.
 #Perform ANOVA.
 anova_model <- aov(value ~ configuration, data = infdata)
@@ -179,9 +178,9 @@ ggplot(heatmap_melt, aes(x = group1, y = group2, fill = difference)) +
   theme(text = ggplot2::element_text(family = "serif", size = 36), axis.text.x = element_text(face = "bold"),
         axis.text.y = element_text(face = "bold"), legend.key.width = unit(1.5, "cm"), legend.key.height = unit(2.5, "cm"),
         axis.title.x = element_blank(), axis.title.y = element_blank())
-savetwoplots(conc(output_dir, "Inflection Heatmap"), width = 30)
+savetwoplots(conc(output_dir, "aii"), width = 30)
 
-#Perform ANOVA
+#bii - Perform ANOVA on scales
 anova_model <- aov(value ~ configuration, data = scadata)
 #Summary of ANOVA
 summary(anova_model)
@@ -225,4 +224,4 @@ ggplot(heatmap_melt, aes(x = group1, y = group2, fill = difference)) +
   theme(text = ggplot2::element_text(family = "serif", size = 36), axis.text.x = element_text(face = "bold"),
         axis.text.y = element_text(face = "bold"), legend.key.width = unit(1.5, "cm"), legend.key.height = unit(2.5, "cm"),
         axis.title.x = element_blank(), axis.title.y = element_blank())
-savetwoplots(conc(output_dir, "Scale Heatmap"), width = 30)
+savetwoplots(conc(output_dir, "bii"), width = 30)
