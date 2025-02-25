@@ -2078,7 +2078,7 @@ perparameteranalysis <- function(parameters, location, name = "Simulation", para
 }
 
 #Save two plots - saves two plots, one a png for easy viewing, and the other whichever type you specify.
-savetwoplots <- function(where, type = "svg", width = 17.342, height = 17.342, mode = "default"){
+savetwoplots <- function(where, type = "png", width = 17.342, height = 17.342, mode = "default"){
   if(!is.null(where)){
     if(tolower(mode) == "default"){
       ggplot2::ggsave(paste(where, ".", type, sep = ""), device = type, width = width, height = height, units = "cm")
